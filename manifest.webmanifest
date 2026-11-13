@@ -1,0 +1,10 @@
+{
+  "name": "Laboratório de Comandos — Validador do Professor",
+  "short_name": "Lab. de Comandos",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f6fa",
+  "theme_color": "#1b1f3b",
+  "lang": "pt-BR",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

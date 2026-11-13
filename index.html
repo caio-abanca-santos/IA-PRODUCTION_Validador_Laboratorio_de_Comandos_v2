@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1b1f3b">
+<title>Laboratório de Comandos · Validador do Professor</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<style>
+  :root {
+    --ink: #1b1f3b; --muted: #5b6078; --line: #dfe1ea; --bg: #f5f6fa; --card: #fff;
+    --C: #2563eb; --P: #7c3aed; --T: #059669; --F: #ea580c; --E: #dc2626; --ok: #059669; --warn: #b45309;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  header { background: var(--ink); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; }
+  header h1 span { color: #fbbf24; }
+  header .status { margin-left: auto; font-size: 12px; opacity: .8; }
+  nav { display: flex; gap: 4px; padding: 8px 16px 0; background: var(--ink); overflow-x: auto; }
+  nav button { background: transparent; color: #c7cae0; border: 0; padding: 10px 14px; font: inherit; font-weight: 600; border-radius: 8px 8px 0 0; cursor: pointer; white-space: nowrap; }
+  nav button.on { background: var(--bg); color: var(--ink); }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  section { display: none; } section.on { display: block; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  h2 { font-size: 16px; margin: 0 0 10px; }
+  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; font-weight: 600; }
+  select, input { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; width: 100%; }
+  .row { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .btn { font: inherit; font-weight: 700; border: 0; border-radius: 8px; padding: 9px 14px; cursor: pointer; background: var(--ink); color: #fff; }
+  .btn.sec { background: #e8e9f3; color: var(--ink); }
+  .btn.danger { background: #fde7e7; color: var(--E); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .challenge { border-left: 6px solid var(--ink); }
+  .challenge b { font-size: 15px; }
+  .teams { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .team { border-top: 6px solid var(--team); }
+  .team .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .team .head b { font-size: 15px; }
+  .pos { font-size: 12px; background: #eef0f7; padding: 3px 8px; border-radius: 99px; }
+  .pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pick select { border-width: 2px; }
+  .pick .C select { border-color: var(--C); } .pick .P select { border-color: var(--P); }
+  .pick .T select { border-color: var(--T); } .pick .F select { border-color: var(--F); }
+  .eth { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+  .eth button { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--E); background: #fff; color: var(--E); font-weight: 800; cursor: pointer; }
+  .eth button.on { background: var(--E); color: #fff; }
+  .result { margin-top: 10px; padding: 10px; border-radius: 8px; background: #f3f4f8; font-size: 13px; }
+  .result.ok { background: #e1f5ee; } .result.no { background: #fdece2; }
+  .chips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+  .chip { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 99px; color: #fff; }
+  .chip.s2 { background: var(--ok); } .chip.s1 { background: var(--warn); } .chip.s0 { background: var(--E); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 8px; border-bottom: 1px solid var(--line); text-align: left; }
+  th { font-size: 12px; color: var(--muted); }
+  .board { display: grid; gap: 6px; }
+  .lane { display: grid; grid-template-columns: 110px 1fr 60px; align-items: center; gap: 8px; }
+  .track { height: 22px; background: #e8e9f3; border-radius: 99px; position: relative; overflow: hidden; }
+  .track i { position: absolute; inset: 0 auto 0 0; background: var(--team); border-radius: 99px; transition: width .4s; }
+  .public { font-size: 20px; }
+  .public .lane { grid-template-columns: 160px 1fr 80px; }
+  .public .track { height: 34px; }
+  .cardlist { columns: 2 300px; font-size: 13px; }
+  .cardlist div { break-inside: avoid; margin-bottom: 6px; }
+  .k { font-weight: 800; }
+  .k.C { color: var(--C); } .k.P { color: var(--P); } .k.T { color: var(--T); } .k.F { color: var(--F); }
+  .hide { display: none !important; }
+  @media (max-width: 520px) { .pick { grid-template-columns: 1fr; } .lane { grid-template-columns: 80px 1fr 44px; } }
+</style>
+<script src="data.js"></script>
+</head>
+<body>
+<header>
+  <h1><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:6px"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2.2h12.4a1.5 1.5 0 0 0 1.3-2.2L14 9V3"/><path d="M7 15h10"/></svg>Laboratório de <span>Comandos</span> · Validador do Professor</h1>
+  <div class="status" id="net"></div>
+</header>
+<nav id="tabs">
+  <button data-t="setup" class="on">1. Equipes</button>
+  <button data-t="round">2. Partida</button>
+  <button data-t="score">3. Placar</button>
+  <button data-t="public">Tela pública (projetar)</button>
+  <button data-t="ref">Cartas</button>
+  <button data-t="data">Dados</button>
+</nav>
+<main>
+  <!-- 1. Equipes -->
+  <section id="setup" class="on">
+    <div class="panel">
+      <h2>Configurar partida</h2>
+      <div class="row">
+        <div><label>Número de equipes (2–12)</label><input id="nTeams" type="number" min="2" max="12" value="4"></div>
+        <div><label>Casa da Chegada (tabuleiro impresso: 24)</label><input id="nCells" type="number" min="10" max="40" value="24"></div>
+      </div>
+      <p class="muted">A partida agora tem rodadas infinitas. Use apenas o nome ou a cor do pino da equipe — nunca nomes completos ou dados dos alunos (LGPD).</p>
+      <div id="teamNames" class="row"></div>
+      <p style="margin-top:12px"><button class="btn" id="startBtn">Iniciar nova partida</button></p>
+    </div>
+  </section>
+
+  <!-- 2. Rodada -->
+  <section id="round">
+    <div class="panel">
+      <div class="row">
+        <div><label>Visualizando a Rodada</label><select id="roundSel"></select></div>
+      </div>
+    </div>
+    <div class="teams" id="teamCards"></div>
+    <p style="margin-top:14px"><button class="btn" id="nextRound">Nova Rodada</button></p>
+  </section>
+
+  <!-- 3. Placar -->
+  <section id="score">
+    <div class="panel">
+      <h2>Placar e tabuleiro</h2>
+      <div class="board" id="boardPriv"></div>
+    </div>
+    <div class="panel">
+      <h2>Histórico por rodada</h2>
+      <div id="history"></div>
+    </div>
+  </section>
+
+  <!-- Tela pública (projetar) -->
+  <section id="public">
+    <div class="panel public">
+      <h2 id="pubTitle" style="font-size:22px"></h2>
+      <div class="board" id="boardPub"></div>
+    </div>
+  </section>
+
+  <!-- Cartas -->
+  <section id="ref">
+    <div class="panel"><h2>Todas as cartas de categoria</h2><div class="cardlist" id="cardList"></div></div>
+    <div class="panel"><h2>Palavras de outras línguas</h2><div class="cardlist" id="glossList"></div></div>
+  </section>
+
+  <!-- Dados -->
+  <section id="data">
+    <div class="panel">
+      <h2>Exportar placar e cópia de segurança</h2>
+      <p class="muted">Os dados ficam salvos apenas neste navegador. Baixe uma cópia de segurança (<i>backup</i>, em inglês) antes de limpar o navegador ou trocar de aparelho. O placar sai como planilha CSV, que abre no Excel ou no Google Planilhas.</p>
+      <p><button class="btn" id="csvBtn">Exportar placar (planilha CSV)</button>
+        <button class="btn sec" id="jsonBtn">Baixar cópia de segurança</button>
+        <label class="btn sec" style="display:inline-block;color:var(--ink);font-size:inherit;margin:0">Restaurar cópia de segurança<input type="file" id="restore" accept=".json" class="hide"></label>
+        <button class="btn danger" id="resetBtn">Apagar partida</button></p>
+    </div>
+  </section>
+</main>
+
+<script>
+const D = window.LABCOMANDOS;
+const COLORS = ['#dc2626','#2563eb','#059669','#ca8a04','#7c3aed','#ea580c','#0891b2','#db2777','#4b5563','#65a30d','#9333ea','#0f766e'];
+const COLOR_NAMES = ['Vermelha','Azul','Verde','Amarela','Roxa','Laranja','Ciano','Rosa','Cinza','Lima','Violeta','Petróleo'];
+const DICAS = {
+  C: 'A IA sabe quem está pedindo e qual é a dificuldade?',
+  P: 'Quem, na vida real, seria a melhor pessoa para te ajudar com isso?',
+  T: 'Qual verbo descreve o que você quer receber no final?',
+  F: 'Como você vai usar essa resposta? Lendo no celular, imprimindo, enviando?'
+};
+// Chave alterada para evitar conflito com jogos salvos na versão anterior
+const KEY = 'labcomandos-partida-v3';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ---------- Estado ----------
+let S = load() || null;
+function load() { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+function createRound(numTeams) {
+  return {
+    teams: Array.from({ length: numTeams }, () => ({
+      des: '', eth: '', C: '', P: '', T: '', F: '', alt: '', sorteio: 0
+    }))
+  };
+}
+
+function newGame(n, cells, names) {
+  S = {
+    cells, current: 0,
+    teams: names.map((nm, i) => ({ name: nm, color: COLORS[i] })),
+    plays: [createRound(names.length)]
+  };
+  save();
+}
+
+// ---------- Regras (Com Regra de 3) ----------
+function scoreCat(desId, cat, cardId) {
+  const v = D.validador[desId][cat];
+  if (!cardId) return 0;
+  if (cardId === v.ideal) return 2;
+  return v.aceitas.includes(cardId) ? 1 : 0;
+}
+
+function evalPlay(round, t) {
+  const tp = S.plays[round].teams[t];
+  if (!tp.des) return { cats: [], mont: 0, filled: false, ethOk: false, ethPts: 0, move: 0, moveDesafio: 0, weakest: [], answered: false, sorteio: 0, aproveitamento: 0 };
+
+  const cats = ['C', 'P', 'T', 'F'].map(k => ({ k, s: scoreCat(tp.des, k, tp[k]) }));
+  const filled = ['C', 'P', 'T', 'F'].every(k => tp[k]);
+  const mont = cats.reduce((a, c) => a + c.s, 0);
+
+  // Regra de 3 para o avanço no tabuleiro (aproveitamento sobre 8 pontos possíveis)
+  const sorteio = tp.sorteio || 0;
+  const aproveitamento = mont / 8;
+  const moveDesafio = Math.round(sorteio * aproveitamento);
+
+  // Ética (Opcional por equipe, bônus adicionado diretamente)
+  let ethOk = false, ethPts = 0, moveEth = 0, answered = !!tp.alt;
+  if (tp.eth) {
+    const eth = D.etica.find(e => String(e.n) === String(tp.eth));
+    if (eth) {
+      ethOk = tp.alt && tp.alt === eth.r;
+      ethPts = ethOk ? eth.pts : 0;
+      moveEth = ethOk ? 1 : 0; 
+    }
+  }
+
+  const move = moveDesafio + moveEth;
+  const zeros = cats.filter(c => c.s === 0), weakest = (zeros.length ? zeros : cats.filter(c => c.s < 2)).map(c => c.k);
+
+  return { cats, mont, filled, ethOk, ethPts, move, moveDesafio, weakest, answered, sorteio, aproveitamento };
+}
+
+function totals() {
+  return S.teams.map((tm, t) => {
+    let pos = 0, pts = 0, ethPts = 0;
+    for (let r = 0; r <= S.current; r++) {
+      const e = evalPlay(r, t);
+      pos += e.move; pts += e.mont + e.ethPts; ethPts += e.ethPts;
+    }
+    return { ...tm, idx: t, pos: Math.min(pos, S.cells), pts, ethPts };
+  });
+}
+
+function ranking() {
+  return totals().sort((a, b) => b.pos - a.pos || b.pts - a.pts || b.ethPts - a.ethPts);
+}
+
+// ---------- UI ----------
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => show(b.dataset.t));
+function show(t) {
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  document.querySelectorAll('main section').forEach(s => s.classList.toggle('on', s.id === t));
+  render();
+}
+function renderNames() {
+  const n = Math.max(2, Math.min(12, +$('#nTeams').value || 4));
+  const old = [...document.querySelectorAll('#teamNames input')].map(i => i.value);
+  $('#teamNames').innerHTML = Array.from({ length: n }, (_, i) =>
+    `<div><label style="color:${COLORS[i]}">Equipe ${i + 1}</label><input value="${esc(old[i] || 'Equipe ' + COLOR_NAMES[i])}"></div>`).join('');
+}
+$('#nTeams').oninput = renderNames;
+$('#startBtn').onclick = () => {
+  if (S && !confirmReplace()) return;
+  const names = [...document.querySelectorAll('#teamNames input')].map(i => i.value.trim() || 'Equipe');
+  newGame(names.length, Math.max(10, +$('#nCells').value || 24), names);
+  show('round');
+};
+function confirmReplace() { return window.confirm('Já existe uma partida salva. Começar outra apaga a atual. Continuar?'); }
+
+function opt(v, label, sel) { return `<option value="${esc(v)}"${String(v) === String(sel) ? ' selected' : ''}>${esc(label)}</option>`; }
+
+function renderRound() {
+  if (!S) { $('#teamCards').innerHTML = '<p class="muted">Configure as equipes primeiro.</p>'; return; }
+  const r = S.current, p = S.plays[r];
+  $('#roundSel').innerHTML = S.plays.map((_, i) => opt(i, `Rodada ${i + 1}`, r)).join('');
+  
+  $('#teamCards').innerHTML = S.teams.map((tm, t) => {
+    const tp = p.teams[t], ev = evalPlay(r, t);
+    
+    // Selects individuais
+    const optsDes = D.desafios.map(d => opt(d.id, `${d.id} — ${d.titulo}`, tp.des)).join('');
+    const optsEth = D.etica.map(e => opt(e.n, `E${String(e.n).padStart(2, '0')} — ${e.tema} (${e.pts} pts)`, tp.eth)).join('');
+    
+    const sel = (k, lbl, opts) => `<div class="${k}"><label>${lbl}</label><select data-t="${t}" data-k="${k}">${opt('', '—', tp[k])}${opts}</select></div>`;
+    const selCats = ['C','P','T','F'].map(k => sel(k, D.categorias[k].nome, D.cartas.filter(c=>c.cat===k).map(c=>opt(c.id, `${c.id} · ${c.texto}`, tp[k])).join(''))).join('');
+
+    // Resultado dinâmico
+    const res = !ev.filled ? `<div class="result">Selecione o desafio e as 4 cartas de montagem para avaliar.</div>` :
+      `<div class="result ${ev.mont >= 5 ? 'ok' : 'no'}">
+        <b>Montagem: ${ev.mont}/8 pontos</b>
+        <div class="chips">${ev.cats.map(c => `<span class="chip s${c.s}">${D.categorias[c.k].nome} ${c.s}</span>`).join('')}</div>
+        
+        <div style="margin-top:8px">
+          <button data-roll="${t}" class="btn sec" style="padding:4px 10px; font-size:13px;">🎲 Sortear Casas no Dado</button>
+        </div>
+        
+        ${ev.sorteio > 0 ? `
+          <div style="margin-top:8px; font-size:14px;">
+            Sorteio: <b>${ev.sorteio}</b>. Regra de 3: <i>(${ev.mont}/8 acertos)</i> × ${ev.sorteio} = <b>${ev.moveDesafio} casa(s)</b>.
+          </div>
+        ` : ''}
+
+        ${ev.weakest.length && ev.mont < 8 ? `<div style="margin-top:6px; font-size:12px">Dica p/ equipe: <i>“${DICAS[ev.weakest[0]]}”</i></div>` : ''}
+        ${tp.eth ? `<div style="margin-top:6px; font-size:13px">Ética: ${ev.answered ? (ev.ethOk ? `correta (+${ev.ethPts} pts, +1 casa bônus)` : 'incorreta (0)') : 'sem resposta'}</div>` : ''}
+        ${ev.sorteio > 0 ? `<div style="margin-top:6px; font-size:14px; border-top: 1px solid rgba(0,0,0,0.1); padding-top:6px;"><b>Avança nesta rodada: ${ev.move} casa(s)</b></div>` : ''}
+      </div>`;
+
+    return `<div class="panel team" style="--team:${tm.color}">
+      <div class="head"><b>${esc(tm.name)}</b><span class="pos">casa ${totals()[t].pos}/${S.cells}</span></div>
+      
+      <div style="margin-bottom:8px">
+        <label>Desafio desta equipe</label>
+        <select data-t="${t}" data-k="des">${opt('', 'Selecione um Desafio', tp.des)}${optsDes}</select>
+      </div>
+      ${tp.des ? `<div class="challenge" style="margin-bottom:10px; padding-left:10px; font-size:13px"><i>${esc(D.desafios.find(x=>x.id===tp.des).texto)}</i></div>` : ''}
+
+      <div class="pick">${selCats}</div>
+
+      <div style="margin-top:10px; padding-top:10px; border-top: 1px dashed var(--line)">
+        <label>Carta de Ética (opcional)</label>
+        <select data-t="${t}" data-k="eth">${opt('', 'Nenhuma Carta de Ética selecionada', tp.eth)}${optsEth}</select>
+      </div>
+      ${tp.eth ? `
+        <div class="muted" style="margin-top:4px; font-size:12px;">Resposta correta da ética: <b>${D.etica.find(x=>String(x.n)===String(tp.eth)).r}</b> (visível só p/ professor)</div>
+        <div class="eth">Resposta da equipe: ${['A', 'B', 'C', 'D'].map(a => `<button data-alt="${a}" data-t="${t}" class="${tp.alt === a ? 'on' : ''}">${a}</button>`).join('')}</div>
+      ` : ''}
+
+      ${res}
+    </div>`;
+  }).join('');
+}
+$('#roundSel').onchange = e => { S.current = +e.target.value; save(); render(); };
+
+// Nova Rodada não possui limite e adiciona dinamicamente ao Array de jogadas
+$('#nextRound').onclick = () => { 
+  S.plays.push(createRound(S.teams.length));
+  S.current++; 
+  save(); 
+  render(); 
+  window.scrollTo(0, 0); 
+};
+
+$('#teamCards').addEventListener('change', e => {
+  const s = e.target; if (s.tagName !== 'SELECT') return;
+  S.plays[S.current].teams[+s.dataset.t][s.dataset.k] = s.value; save(); render();
+});
+
+$('#teamCards').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const tp = b.dataset.t != null ? S.plays[S.current].teams[+b.dataset.t] : null;
+  if (b.dataset.alt) tp.alt = tp.alt === b.dataset.alt ? '' : b.dataset.alt;
+  else if (b.dataset.roll != null) S.plays[S.current].teams[+b.dataset.roll].sorteio = 1 + Math.floor(Math.random() * 6);
+  else return;
+  save(); render();
+});
+
+function boardHTML() {
+  return ranking().map((t, i) => `<div class="lane" style="--team:${t.color}">
+    <b>${i + 1}º ${esc(t.name)}</b><div class="track"><i style="width:${(t.pos / S.cells) * 100}%"></i></div>
+    <span>${t.pos >= S.cells ? 'FIM' : 'casa ' + t.pos} · ${t.pts} pts</span></div>`).join('');
+}
+
+function renderScore() {
+  if (!S) { $('#boardPriv').innerHTML = '<p class="muted">Nenhuma partida.</p>'; $('#history').innerHTML = ''; return; }
+  $('#boardPriv').innerHTML = boardHTML();
+  let h = '<table><tr><th>Rodada</th>' + S.teams.map(t => `<th>${esc(t.name)}</th>`).join('') + '</tr>';
+  for (let r = 0; r <= S.current; r++) {
+    h += `<tr><td>${r + 1}</td>` + S.teams.map((_, t) => {
+      const e = evalPlay(r, t), tp = S.plays[r].teams[t];
+      if (!tp.des) return `<td>—</td>`;
+      return `<td>${tp.des}${tp.eth?'/E'+String(tp.eth).padStart(2,'0'):''} · ${e.filled ? `${e.mont}/8 pts` : '—'} · Sorteio: ${tp.sorteio||0} · Av: +${e.move}</td>`;
+    }).join('') + '</tr>';
+  }
+  $('#history').innerHTML = h + '</table>';
+}
+
+function renderPublic() {
+  if (!S) { $('#pubTitle').textContent = 'Nenhuma partida em andamento'; $('#boardPub').innerHTML = ''; return; }
+  $('#pubTitle').textContent = `Rodada ${S.current + 1} (Partida Contínua)`;
+  $('#boardPub').innerHTML = boardHTML();
+}
+
+function renderRef() {
+  $('#cardList').innerHTML = D.cartas.map(c => `<div><span class="k ${c.cat}">${c.id}</span> ${esc(c.texto)}</div>`).join('');
+}
+function renderGloss() {
+  $('#glossList').innerHTML = D.glossario.map(g => `<div><b>${esc(g[0])}</b> <span class="muted">(${esc(g[1])})</span> — ${esc(g[2])}</div>`).join('');
+}
+function render() { renderRound(); renderScore(); renderPublic(); renderRef(); renderGloss(); }
+
+// ---------- Dados ----------
+function download(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$('#csvBtn').onclick = () => {
+  if (!S) return;
+  const rows = [['rodada', 'equipe', 'desafio', 'etica', 'C', 'P', 'T', 'F', 'montagem_pts', 'etica_pts', 'sorteio', 'casas_andadas']];
+  for (let r = 0; r <= S.current; r++) S.teams.forEach((tm, t) => {
+    const e = evalPlay(r, t), tp = S.plays[r].teams[t];
+    rows.push([r + 1, tm.name, tp.des||'', tp.eth||'', tp.C, tp.P, tp.T, tp.F, e.mont, e.ethPts, tp.sorteio||0, e.move]);
+  });
+  download('laboratorio-de-comandos-placar.csv', '﻿' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n'), 'text/csv');
+};
+$('#jsonBtn').onclick = () => S && download('laboratorio-de-comandos-copia-de-seguranca.json', JSON.stringify(S, null, 2), 'application/json');
+$('#restore').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const obj = JSON.parse(await f.text()); if (!obj.teams || !obj.plays) throw 0; S = obj; save(); show('score'); }
+  catch (err) { alert('Arquivo de cópia de segurança inválido.'); }
+};
+$('#resetBtn').onclick = () => { if (window.confirm('Apagar a partida salva neste aparelho?')) { S = null; try { localStorage.removeItem(KEY); } catch (e) {} render(); show('setup'); } };
+
+// ---------- Offline ----------
+function net() { $('#net').textContent = navigator.onLine ? 'conectado à internet · também funciona sem internet' : 'sem internet ✔ funcionando'; }
+addEventListener('online', net); addEventListener('offline', net); net();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+renderNames();
+if (S) { $('#nTeams').value = S.teams.length; $('#nCells').value = S.cells; }
+render();
+</script>
+</body>
+</html>

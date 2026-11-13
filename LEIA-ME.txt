@@ -1,0 +1,18 @@
+LABORATÓRIO DE COMANDOS — VALIDADOR DO PROFESSOR (versão 2.0, novembro de 2026)
+
+Como abrir (sem internet):
+1. Copie esta pasta inteira para o computador ou celular do professor.
+2. Dê dois cliques em index.html. Ele abre no navegador (Chrome, Edge ou Firefox) e funciona sem internet.
+   HTML (sigla em inglês) = formato das páginas da internet.
+3. Opcional: publicado num endereço da internet (ex.: GitHub Pages), pode ser instalado como aplicativo
+   pelo navegador ("Instalar aplicativo") e continua funcionando sem internet depois do 1º acesso.
+
+O que mudou em relação ao protótipo PromptLab (Sprint 3):
+- Nome "Laboratório de Comandos" e textos das cartas iguais ao kit impresso final (04_Cartas e Manual v2.0).
+- Temas das Cartas de Ética conforme o Anexo B do Manual.
+- Palavras de outras línguas traduzidas na tela e glossário na aba "Cartas".
+- Equipe reprovada recebe a dica da categoria zerada (Manual, seção 9 — Erros comuns).
+- Aba "2. Rodada" passou a se chamar "2. Partida", como no Manual (seção 11).
+
+Ainda não faz: aplicar automaticamente as casas especiais do tabuleiro (Comando de Ouro, Alerta de Dados,
+Revisão, Checar Fontes). Elas continuam sendo aplicadas no tabuleiro físico.
